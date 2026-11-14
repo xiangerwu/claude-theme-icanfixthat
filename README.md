@@ -40,7 +40,7 @@ The portrait is drawn wherever the surface has SVG, and as a picture in terminal
 At a Claude Code prompt:
 
 ```
-/plugin install icanfixthat-hud --marketplace <owner>/<repo>
+/plugin install icanfixthat-hud --marketplace xiangerwu/claude-theme-icanfixthat
 ```
 
 Answer `y` to add the marketplace, then pick a scope.
