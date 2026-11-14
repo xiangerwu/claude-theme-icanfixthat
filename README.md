@@ -1,8 +1,10 @@
 # Icanfixthat HUD
 
-A night-city HUD for Claude Code, drawn in the band above the prompt.
+繁體中文 | [English](docs/README.en.md)
 
-![The HUD above the prompt in the Claude desktop app](docs/hud.png)
+為 Claude Code 打造的夜城風格 HUD，顯示在輸入提示上方的資訊區。
+
+![Claude 桌面版輸入提示上方的 HUD](docs/hud.png)
 
 ```
 ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
@@ -16,81 +18,83 @@ A night-city HUD for Claude Code, drawn in the band above the prompt.
 └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
 ```
 
-| Column | Shows |
+| 區塊 | 顯示內容 |
 | --- | --- |
-| Portrait | A persona portrait (an empty 「無訊號」 frame until you add one) |
-| Context | Fill of the context window, its top categories, and a sparkline of the fill after each of the last 8 turns |
-| Plan limits | The 5-hour and weekly windows: use, a white cell inside the bar for how much of the window has passed, time left, and whether use runs ahead of or under pace |
-| Tool calls per turn | Peak and average over the last 10 turns, as a sparkline |
-| Status line | `◆ <name> ▸` and a caring line on the left; the 5-hour use (or `處理中…`) on the right |
-| Footer | Tool calls, turns, last turn's length, failed calls, uptime, clock, and `○ 待命` / `● 運作中` |
+| 頭像 | 角色頭像；尚未加入圖片時顯示「無訊號」外框 |
+| 上下文 | 上下文視窗使用量、主要類別，以及最近 8 回合結束後的用量趨勢圖 |
+| 方案額度 | 5 小時與每週額度的使用量、代表已過時間的白色標記、剩餘時間，以及用量是否超前或低於時間進度 |
+| 每回合工具 | 最近 10 回合的工具呼叫峰值、平均值與趨勢圖 |
+| 狀態列 | 左側顯示 `◆ <名稱> ▸` 與關心語句；右側顯示 5 小時用量，執行時則顯示 `處理中…` |
+| 底列 | 工具呼叫數、回合數、上回合耗時、失敗次數、運行時間、時鐘，以及 `○ 待命` / `● 運作中` |
 
-It draws in the terminal, the desktop app, VS Code and the mobile app, labelled in Traditional Chinese, and never scrolls: the whole HUD takes 9 rows, laid side by side across the band's width (the chat column's, which the app sets). Narrow, the tool column steps aside, then the limits column; with fewer than 9 rows, only the two-row status strip shows.
+支援終端機、桌面版、VS Code 與行動版，介面標示皆為繁體中文。整個 HUD 固定占用 9 列，不會捲動，各區塊依應用程式設定的聊天欄寬度並排。寬度不足時會先隱藏工具欄，再隱藏額度欄；可用高度少於 9 列時，只顯示兩列狀態資訊。
 
-Bars are spaced cells (`▌`) on a dark track that sinks into the panel: the context bar split by category (cyan, amber, pink), the 5-hour bar in red, the weekly bar in cyan, with a white cell for the time gone. Columns run context, tools, limits: the limits column holds the right edge (31%), the tools sit before it (22%), and the context takes the rest.
+進度條以間隔排列的色格（`▌`）呈現在深色底軌上。上下文依類別分為青色、琥珀色與粉色；5 小時額度為紅色，每週額度為青色，白色標記代表已過時間。欄位由左至右依序為上下文、工具與額度：右側額度欄占 31%，工具欄占 22%，其餘空間留給上下文。
 
-Where the surface draws SVG (desktop, VS Code, mobile), a thin caution tape in the frame's amber runs above and below the HUD (2 px tall, 144 px dashes 144 px apart, drawn on whole pixels), bars are exact cells (8 px wide, 1.4 px apart), the counters and clock are set in small type (11 px), and the portrait frame is 99×100, the picture cropped to fill it, never stretched. The terminal keeps a rounded amber border, `▌` cells and its own type.
+在支援 SVG 的介面（桌面版、VS Code、行動版）中，HUD 上下方會顯示與外框同色的琥珀色警示帶：高 2 px，每段長 144 px、間隔 144 px，對齊整數像素。進度條色格寬 8 px、間隔 1.4 px；計數器與時鐘字級為 11 px。頭像框為 99×100，圖片會裁切填滿，不會拉伸。終端機則使用琥珀色圓角外框、`▌` 色格與終端機本身的字型。
 
-The status strip is a little conversation: on the left, the persona says one of twelve caring lines (a new one every ten minutes; edit `CARE_LINES` in [`hooks/persona.ts`](hooks/persona.ts)); on the right, the 5-hour use, or `處理中…` while a turn runs.
+狀態列像是一段小小的對話：左側角色會從 12 句關心語句中輪替，每 10 分鐘換一句；可在 [`hooks/persona.ts`](hooks/persona.ts) 的 `CARE_LINES` 修改。右側顯示 5 小時用量，回合執行中則顯示 `處理中…`。
 
-The portrait is drawn wherever the surface has SVG, and as a picture in terminals that draw images. The text takes the app's own font: on Claude Code 2.1.325 a hooks module cannot choose one (`Text`'s `mono` and `size` are refused at run time).
+支援 SVG 的介面與支援圖片的終端機皆可顯示頭像。文字沿用應用程式本身的字型：在 Claude Code 2.1.325 中，hooks 模組無法自行指定字型（`Text` 的 `mono` 與 `size` 會在執行時被拒絕）。
 
-## Install
+## 安裝
 
-At a Claude Code prompt:
+在 Claude Code 輸入：
 
 ```
 /plugin install icanfixthat-hud --marketplace xiangerwu/claude-theme-icanfixthat
 ```
 
-Answer `y` to add the marketplace, then pick a scope.
+輸入 `y` 加入 marketplace，再選擇安裝範圍。
 
-## Make it yours
+## 自訂外觀
 
-The persona ships as **LAPWING** with an empty portrait frame.
+預設角色名稱為 **LAPWING**，頭像框為空。
 
-- **Name**: set `persona_name` in the plugin's options (the config menu, or `settings.json` → `pluginConfigs["icanfixthat-hud"].options.persona_name`). Empty shows no name.
-- **Portrait**: put your picture at `assets/portrait.jpg` (about 256×320, used by the desktop, VS Code and mobile apps, under a pink scanline veil) and `assets/portrait.png` (about 128×160, used by terminals that draw images). They are read when a session starts and are git-ignored, so art you may use yourself is never redistributed with the repository. Without them the HUD draws a "NO SIGNAL" frame.
-- **Colors**: the palette is the `C` object at the top of [`hooks/register.tsx`](hooks/register.tsx).
+- **名稱**：在外掛設定選單，或 `settings.json` → `pluginConfigs["icanfixthat-hud"].options.persona_name` 設定 `persona_name`。留空便不顯示名稱。
+- **頭像**：將圖片放在 `assets/portrait.jpg`（建議約 256×320，供桌面版、VS Code 與行動版使用，會覆蓋粉色掃描線）及 `assets/portrait.png`（建議約 128×160，供支援圖片的終端機使用）。圖片會在工作階段開始時讀取，且已由 Git 忽略，不會隨 repo 散布你的個人使用圖片。未提供圖片時，HUD 會顯示「NO SIGNAL」外框。
+- **配色**：修改 [`hooks/register.tsx`](hooks/register.tsx) 頂部的 `C` 物件。
 
-## Develop
+## 開發
 
-Run Claude Code with the folder loaded and watched:
+啟動 Claude Code，載入並監看本地資料夾：
 
 ```
 claude --plugin-dir /path/to/codex_theme_Icanfixthat
 ```
 
-For the desktop app, name the folder in `CLAUDE_CODE_PLUGIN_DIRS` (in the `env` block of `~/.claude/settings.json`).
+桌面版請在 `~/.claude/settings.json` 的 `env` 區塊中，以 `CLAUDE_CODE_PLUGIN_DIRS` 指定資料夾。
+
+驗證與測試：
 
 ```
 claude plugin validate .
 claude plugin test .
 ```
 
-Layout:
+目錄結構：
 
 ```
-.claude-plugin/plugin.json       manifest and the persona_name option
-.claude-plugin/marketplace.json  makes this repository installable
-hooks/register.tsx               the hooks and the band
-hooks/format.ts                  pure formatting helpers (bars, pace, clock)
-hooks/persona.ts                 portrait frame and placeholder
-assets/                          your portrait.jpg / portrait.png (git-ignored)
-types/index.d.ts                 shared types
-tests/hud.test.tsx               helper and render tests
+.claude-plugin/plugin.json       外掛資訊與 persona_name 選項
+.claude-plugin/marketplace.json  讓此 repo 可透過 marketplace 安裝
+hooks/register.tsx              hooks 與 HUD 資訊區
+hooks/format.ts                 格式化工具（進度條、用量節奏、時鐘）
+hooks/persona.ts                頭像框與預設占位畫面
+assets/                         個人 portrait.jpg / portrait.png（Git 忽略）
+types/index.d.ts                共用型別
+tests/hud.test.tsx              工具函式與畫面渲染測試
 ```
 
-## Notes
+## 注意事項
 
-- Plan limits show only on a Claude subscription; with an API key the column says there are no readings.
-- Built and tested against Claude Code 2.1.325. On that build `$.state` is missing at run time, so the counters live in the module and start over when the plugin hot-reloads. The usage figures come straight back.
-- On that build the test kit ignores `test(name, { options }, body)`, so the named-persona path is not covered by a test yet.
+- 方案額度僅適用於 Claude 訂閱；使用 API key 時，該欄會顯示沒有可用讀值。
+- 本專案以 Claude Code 2.1.325 建置與測試。該版本執行時缺少 `$.state`，因此計數器保存在模組內，外掛熱重載時會重新計算；用量資料則會立即恢復。
+- 該版本的測試工具會忽略 `test(name, { options }, body)`，因此自訂角色名稱的路徑尚未有測試涵蓋。
 
-## License
+## 授權
 
-The code is under the [MIT License](LICENSE).
+程式碼採用 [MIT 授權](LICENSE)。
 
-## Credits
+## 圖片來源
 
-Portrait art in the example screenshot: **@kuzuko0503**. The artwork belongs to the artist and is not covered by this repository's MIT License. It is shown here with credit only. The portrait files themselves (`assets/portrait.*`) are not part of the repository.
+範例截圖中的頭像繪師：**@kuzuko0503**。圖片版權屬於原作者，不適用於本 repo 的 MIT 授權，此處僅標示來源。頭像檔案本身（`assets/portrait.*`）未包含在 repo 中。
