@@ -26,6 +26,7 @@ import {
 import type { Segment } from './format'
 import { careLine, placeholderSvg, portraitSvg } from './persona'
 import { barSvg, smallText, tapeSvg } from './svg'
+import { LOOK, SCENE, UNPAINTED } from './theme'
 import type { Run } from './svg'
 
 const EMPTY_STATS: Stats = {
@@ -513,6 +514,21 @@ export const register: Register = (on, options) => {
 
   on('session.start', async ($, e, next) => {
     const result = await next(e)
+
+    // The look: colors and the night-city backdrop. A surface that draws no
+    // themes says why; the HUD goes on either way.
+    if (UNPAINTED !== undefined) {
+      $.ui.toast(UNPAINTED)
+    }
+    try {
+      const set = await $.theme.set(LOOK)
+      if (!set.isDrawn) {
+        $.ui.status(set.reason)
+      }
+    } catch {
+      // ponytail: no theme where the host refuses one; the HUD still draws.
+    }
+
     portrait = await loadPortrait($)
     const u = await $.session.usage()
     startedAt = u.startedAt
@@ -574,6 +590,16 @@ export const register: Register = (on, options) => {
     $.ui.invalidate('ui.render')
 
     return result
+  })
+
+  // The backdrop the look names: the lattice and the scan, behind the chat.
+  on('ui.render', { component: 'Backdrop' }, ($, e, next) => {
+    if (e.surface !== 'desktop' && e.surface !== 'mobile') {
+      return next(e)
+    }
+    const { Svg } = $.ui.resolve(e)
+
+    return <Svg source={SCENE} alt="A slow lattice of interlinked cells under a cold scan" isInteractive />
   })
 
   on('ui.render', { component: 'AbovePrompt' }, ($, e, next) => {

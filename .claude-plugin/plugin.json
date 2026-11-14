@@ -1,9 +1,17 @@
 {
   "name": "icanfixthat-hud",
-  "version": "0.1.0",
-  "description": "A night-city HUD above the prompt: context fill, plan limits with pace, tool calls per turn, and a persona status line.",
+  "version": "0.2.0",
+  "description": "Interlinked: a night-city theme (dark palette, animated lattice backdrop) with a HUD above the prompt: context, plan limits, tool calls and a persona strip.",
   "license": "MIT",
-  "keywords": ["hud", "status", "theme", "above-prompt", "usage", "rate-limits"],
+  "keywords": [
+    "above-prompt",
+    "backdrop",
+    "hud",
+    "rate-limits",
+    "status",
+    "theme",
+    "usage"
+  ],
   "userConfig": {
     "persona_name": {
       "type": "string",

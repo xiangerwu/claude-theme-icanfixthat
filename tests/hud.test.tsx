@@ -15,6 +15,13 @@ import {
 } from '../hooks/format'
 import { CARE_EVERY_MS, CARE_LINES, careLine } from '../hooks/persona'
 import { barSvg, smallText, tapeSvg, textWidth } from '../hooks/svg'
+import { LOOK, SCENE, UNPAINTED } from '../hooks/theme'
+
+test('the Interlinked theme builds without a Desktop painting blocker', async () => {
+  expect(UNPAINTED).toBe(undefined)
+  expect(LOOK.backdrop?.scene).toBe('interlinked')
+  expect(SCENE).toMatch(/^<svg /)
+})
 
 const HOUR = 60 * 60 * 1000
 const NOW = Date.UTC(2026, 10, 13, 14, 23)
