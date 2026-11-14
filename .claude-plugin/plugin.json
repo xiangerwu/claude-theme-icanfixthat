@@ -1,0 +1,15 @@
+{
+  "name": "icanfixthat-hud",
+  "version": "0.1.0",
+  "description": "A night-city HUD above the prompt: context fill, plan limits with pace, tool calls per turn, and a persona status line.",
+  "license": "MIT",
+  "keywords": ["hud", "status", "theme", "above-prompt", "usage", "rate-limits"],
+  "userConfig": {
+    "persona_name": {
+      "type": "string",
+      "title": "Persona name",
+      "description": "Name shown on the HUD's status line. Leave empty for none.",
+      "default": "lapwing"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "icanfixthat",
+  "owner": { "name": "Icanfixthat" },
+  "plugins": [{ "name": "icanfixthat-hud", "source": "./" }]
+}
