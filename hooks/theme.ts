@@ -158,7 +158,7 @@ export const UNPAINTED = themeProblems.find(line => line.startsWith("Desktop won
 export const APPEARANCE_DEFAULTS = {
   city: true, rain: false, rainAmount: 45, rainSpeed: 35,
   glass: true, glassStrength: 12, light: true, lightStrength: 30,
-  lightColor: '#ffe3a8', scan: true, scanSpeed: 16, hud: true,
+  lightColor: '#ffe3a8', scan: true, scanSpeed: 11, hud: true,
   hudWidth: 100, motion: false,
 }
 export type Appearance = typeof APPEARANCE_DEFAULTS
@@ -220,7 +220,7 @@ export function sceneFor(p: Appearance): string {
   const lattice = BASE_SCENE.slice(start, scanStart)
   const scan = p.scan ? BASE_SCENE.slice(scanStart, BASE_SCENE.lastIndexOf('</svg>')) : ''
   const rain = p.rain ? Array.from({ length: Math.round(p.rainAmount * .4) }, (_, i) =>
-    `<ellipse class="il-rain" cx="${((i * 37 + 11) % 100) * 16}" cy="-60" rx="${1.5 + i % 3}" ry="${7 + i % 5 * 3}" style="animation-duration:${(22 - p.rainSpeed * .16) * (.7 + i % 7 * .13)}s;animation-delay:-${i * 7 % 23}s"/>`).join('') : ''
+    `<ellipse class="il-rain" cx="${((i * 37 + 11) % 100) * 16}" cy="${((i * 53 + 29) % 100) * 9}" rx="${2 + i % 3}" ry="${2.5 + i % 4}" style="animation-duration:${(22 - p.rainSpeed * .16) * (.7 + i % 7 * .13)}s;animation-delay:-${i * 7 % 23}s"/>`).join('') : ''
   return BASE_SCENE.slice(0, start) + `
   <defs>
     <filter id="il-distance"><feGaussianBlur stdDeviation="3.5"/></filter>
@@ -228,14 +228,14 @@ export function sceneFor(p: Appearance): string {
     <radialGradient id="il-light" cx="100%" cy="0%" r="95%"><stop stop-color="${p.lightColor}" stop-opacity=".75"/><stop offset=".4" stop-color="${p.lightColor}" stop-opacity=".3"/><stop offset="1" stop-color="${p.lightColor}" stop-opacity="0"/></radialGradient>
     <linearGradient id="il-edge-light"><stop stop-color="#2fb4c9" stop-opacity="0"/><stop offset=".5" stop-color="#e8a33d"/><stop offset="1" stop-color="#2fb4c9" stop-opacity="0"/></linearGradient>
     <style>
-      @keyframes il-rain-fall { from { transform:translateY(0) } to { transform:translateY(1160px) } }
+      @keyframes il-rain-hit { 0% { opacity:0; transform:translateY(0) scale(.2) } 4% { opacity:1; transform:translateY(0) scale(1.15) } 10% { transform:translateY(0) scale(1) } 85% { opacity:.85 } 100% { opacity:0; transform:translateY(160px) scale(.85,1.2) } }
       @keyframes il-top-edge { from { transform:translateX(-500px) } to { transform:translateX(1600px) } }
-      .il-rain { fill:#b3dfed22;stroke:#b5dbe56b;stroke-width:.8;animation:il-rain-fall 16s linear infinite;animation-play-state:${p.motion ? 'running' : 'paused'} }
+      .il-rain { fill:#b3dfed22;stroke:#b5dbe56b;stroke-width:.8;transform-box:fill-box;transform-origin:center;animation:il-rain-hit 16s ease-in infinite }
       .il-top-edge { animation:il-top-edge 12s linear infinite;animation-play-state:${p.motion ? 'running' : 'paused'} }
       .il-scanbar { animation-duration:${p.scanSpeed}s }
-      @media(prefers-reduced-motion:reduce) { .il-link,.il-node,.il-edge { animation:none!important } ${p.motion ? '' : '.il-scanbar { animation:none;display:none }'} }
     </style>
   </defs>
+  <!-- Far to near: city, lattice, then the glass (frosted blurs both), rain on the glass. -->
   <g id="il-distant" filter="url(#il-glass)">
     ${p.city ? `<g id="il-city" transform="translate(96 380) scale(.88 .62)" opacity=".62" filter="url(#il-distance)">${CITY}</g>` : ''}
     <g id="il-lattice">${lattice}</g>

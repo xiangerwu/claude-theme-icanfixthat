@@ -499,6 +499,13 @@ function band(v: View, width: number, rows: number) {
   )
 }
 
+// Light presets drawn from the scene's own colors; the hex input stays for anything else.
+const LIGHT_PRESETS = [
+  { value: '#ffe3a8', label: '暖白' }, { value: '#e8a33d', label: '琥珀' },
+  { value: '#2fb4c9', label: '青' }, { value: '#83b8ff', label: '冷藍' },
+  { value: '#eb69b6', label: '粉' }, { value: '#9a6bd6', label: '紫' },
+]
+
 async function saveAppearance($: EngineInterface, state: { value: Appearance; status: string; saving: boolean }, candidate: Appearance) {
     if (state.saving) return
     state.saving = true
@@ -526,7 +533,7 @@ export const register: Register = (on, options) => {
   })
   on('ui.render', { component: 'Pane', requestId: 'interlinked-appearance' }, ($, e) => {
     const { Box, Text, Button, Input, Select } = $.ui.resolve(e)
-    const toggles = [['city','顯示大樓'],['rain','玻璃雨滴'],['glass','背景／面板霧玻璃'],['light','右上光源'],['scan','掃描線'],['hud','顯示 HUD'],['motion','雨景／邊框動畫（含減少動畫例外）']] as const
+    const toggles = [['city','顯示大樓'],['rain','玻璃雨滴'],['glass','背景／面板霧玻璃'],['light','右上光源'],['scan','掃描線'],['hud','顯示 HUD'],['motion','頂部邊框動畫']] as const
     const numbers = [['rainAmount','雨量 %'],['rainSpeed','雨速'],['glassStrength','霧化 px'],['lightStrength','亮度 %'],['scanSpeed','掃描週期 秒'],['hudWidth','HUD 寬度 %']] as const
     return <Box flexDirection="column">
       <Text color={C.amber}>夜城 · 外觀</Text>
@@ -535,7 +542,11 @@ export const register: Register = (on, options) => {
         if (!value.trim() || !Number.isFinite(Number(value))) { appearanceState.status='請輸入有效數值。'; $.ui.invalidate('ui.render'); return }
         void saveAppearance($, appearanceState, { ...appearanceState.value, [key]: Number(value) })
       }} />)}
-      <Input key="lightColor" label="光源色碼 #RRGGBB" value={appearanceState.value.lightColor} submitLabel="套用" onSubmit={value => {
+      <Select key="lightPreset" label="光源顏色" value={appearanceState.value.lightColor.toLowerCase()} options={[
+        ...LIGHT_PRESETS,
+        ...(LIGHT_PRESETS.some(o => o.value === appearanceState.value.lightColor.toLowerCase()) ? [] : [{ value: appearanceState.value.lightColor.toLowerCase(), label: '自訂 ' + appearanceState.value.lightColor }]),
+      ]} onSelect={value => { void saveAppearance($, appearanceState, { ...appearanceState.value, lightColor: value }) }} />
+      <Input key="lightColor" label="自訂色碼 #RRGGBB" value={appearanceState.value.lightColor} submitLabel="套用" onSubmit={value => {
         if (!/^#[0-9a-f]{6}$/i.test(value)) { appearanceState.status='色碼格式為 #RRGGBB。'; $.ui.invalidate('ui.render'); return }
         void saveAppearance($, appearanceState, { ...appearanceState.value, lightColor:value })
       }} />
