@@ -15,7 +15,7 @@ import {
 } from '../hooks/format'
 import { CARE_EVERY_MS, CARE_LINES, careLine } from '../hooks/persona'
 import { barSvg, smallText, tapeSvg, textWidth } from '../hooks/svg'
-import { LOOK, SCENE, UNPAINTED } from '../hooks/theme'
+import { LOOK, SCENE, UNPAINTED, APPEARANCE_DEFAULTS, readAppearance, sceneFor } from '../hooks/theme'
 
 test('the Interlinked theme builds without a Desktop painting blocker', async () => {
   expect(UNPAINTED).toBe(undefined)
@@ -236,4 +236,56 @@ test('a survey keeps the band', async ($, on) => {
   const ui = await $.ui.mount({ ...BAND, surface: 'desktop', props: { ...BAND.props, hasSurvey: true } })
   expect((await ui.find({ type: 'Text' }))?.text).toBe('engine')
   await ui.unmount()
+})
+
+
+test('appearance settings validate and keep city, lattice, glass and rain in order', () => {
+  const safe = readAppearance('{"lightColor":"<script>","rainAmount":999,"glassStrength":-1,"city":"yes"}')
+  expect(safe.lightColor).toBe('#ffe3a8')
+  expect(safe.rainAmount).toBe(100)
+  expect(safe.glassStrength).toBe(0)
+  expect(safe.city).toBe(true)
+  expect(readAppearance('invalid')).toEqual(APPEARANCE_DEFAULTS)
+  const scene = sceneFor({ ...APPEARANCE_DEFAULTS, rain: true, lightColor: '#82baff' })
+  expect(scene.indexOf('id="il-city"')).toBeLessThan(scene.indexOf('id="il-lattice"'))
+  expect(scene.indexOf('id="il-lattice"')).toBeLessThan(scene.indexOf('id="il-glass-rain"'))
+  expect(scene).toContain('#82baff')
+  expect(sceneFor({ ...APPEARANCE_DEFAULTS, city: false })).not.toContain('id="il-city"')
+})
+
+test('appearance panel changes real rendering, validates input and preserves its entry when HUD is hidden', async ($, on) => {
+  boot(on)
+  const saved: string[] = []
+  let opened = ''
+  on('ui.open', (_, e) => { opened = e.id; return { value: { isPlaced: true } } })
+  on('ui.close', () => ({ value: undefined }))
+  on('config.set', (_, e) => { saved.push(String(e.value)); return { value: e.value } })
+  await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
+  const hud = await $.ui.mount({ ...BAND, surface: 'desktop' })
+  await hud.press({ key: 'appearance-open' })
+  expect(opened).toBe('interlinked-appearance')
+  const panel = await $.ui.mount({ plugin: 'icanfixthat-hud', component: 'Pane', requestId: 'interlinked-appearance', surface: 'desktop', props: { title: '夜城外觀', isFocused: true, bodyColumns: 52, placement: 'inline', scroll: { offset: 0, bodyRows: 24 }, view: {} } })
+  expect((await panel.findAll({ type: 'Select' })).length).toBe(7)
+  await panel.select({ key: 'city', value: 'false' })
+  expect(JSON.parse(saved[saved.length - 1] ?? '').city).toBe(false)
+  await panel.input({ key: 'lightColor', text: '#82baff' })
+  expect(JSON.parse(saved[saved.length - 1] ?? '').lightColor).toBe('#82baff')
+  const count = saved.length
+  await panel.input({ key: 'lightColor', text: '<script>' })
+  expect(saved.length).toBe(count)
+  await panel.input({ key: 'glassStrength', text: '999' })
+  expect(JSON.parse(saved[saved.length - 1] ?? '').glassStrength).toBe(24)
+  await panel.select({ key: 'hud', value: 'false' })
+  expect(await hud.find({ type: 'Text', text: /^上下文$/ })).toBe(undefined)
+  expect(await hud.find({ key: 'appearance-open' })).not.toBe(undefined)
+  const backdrop = await $.ui.mount({ plugin: 'icanfixthat-hud', component: 'Backdrop', surface: 'desktop', props: { scene: 'interlinked', plugin: 'icanfixthat-hud', glass: false } })
+  const source = String((await backdrop.find({ type: 'Svg' }))?.props.source)
+  expect(source).not.toContain('id="il-city"')
+  expect(source).toContain('#82baff')
+  await panel.press({ key: 'appearance-reset' })
+  expect(JSON.parse(saved[saved.length - 1] ?? '')).toEqual(APPEARANCE_DEFAULTS)
+  await panel.press({ key: 'appearance-close' })
+  await backdrop.unmount()
+  await panel.unmount()
+  await hud.unmount()
 })

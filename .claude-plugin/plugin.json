@@ -1,6 +1,6 @@
 {
   "name": "icanfixthat-hud",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Interlinked: a night-city theme (dark palette, animated lattice backdrop) with a HUD above the prompt: context, plan limits, tool calls and a persona strip.",
   "license": "MIT",
   "keywords": [
@@ -18,6 +18,12 @@
       "title": "Persona name",
       "description": "Name shown on the HUD's status line. Leave empty for none.",
       "default": "lapwing"
+    },
+    "appearance": {
+      "type": "string",
+      "title": "夜城外觀設定",
+      "description": "由 HUD 的「外觀」面板保存。也可填入 JSON；無效值會回到預設。",
+      "default": "{}"
     }
   }
 }

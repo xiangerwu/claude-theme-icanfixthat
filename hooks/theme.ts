@@ -44,7 +44,7 @@ const { theme, problems: themeProblems } = makeColors({
 
 // A slow lattice of interlinked cells behind a cold scan. Dark, so a glass
 // veil over it keeps the words first. Runs no script; CSS animates it.
-export const SCENE = `<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+const BASE_SCENE = `<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <radialGradient id="il-bg" cx="28%" cy="22%" r="95%">
       <stop offset="0%" stop-color="#16222c"/>
@@ -142,7 +142,7 @@ export const SCENE = `<svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid
 
 </svg>`
 
-export const LOOK: ThemeSetArgs = {
+const BASE_LOOK: ThemeSetArgs = {
   colors: theme,
   backdrop: {
     scene: 'interlinked',
@@ -154,3 +154,101 @@ export const LOOK: ThemeSetArgs = {
 
 /** The line that would stop Desktop painting the look, if any. */
 export const UNPAINTED = themeProblems.find(line => line.startsWith("Desktop won't paint"))
+
+export const APPEARANCE_DEFAULTS = {
+  city: true, rain: false, rainAmount: 45, rainSpeed: 35,
+  glass: true, glassStrength: 12, light: true, lightStrength: 30,
+  lightColor: '#ffe3a8', scan: true, scanSpeed: 16, hud: true,
+  hudWidth: 100, motion: false,
+}
+export type Appearance = typeof APPEARANCE_DEFAULTS
+export const APPEARANCE_RANGES = {
+  rainAmount: [10, 100], rainSpeed: [10, 100], glassStrength: [0, 24],
+  lightStrength: [0, 100], scanSpeed: [6, 30], hudWidth: [80, 100],
+} as const
+
+/** Validate the saved string once; interpolated SVG values are only typed bounds/hex. */
+export function readAppearance(raw: unknown): Appearance {
+  const value = { ...APPEARANCE_DEFAULTS }
+  if (typeof raw !== 'string') return value
+  try {
+    const saved = JSON.parse(raw)
+    if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return value
+    for (const key of ['city', 'rain', 'glass', 'light', 'scan', 'hud', 'motion'] as const) {
+      if (typeof saved[key] === 'boolean') value[key] = saved[key]
+    }
+    for (const key of Object.keys(APPEARANCE_RANGES) as (keyof typeof APPEARANCE_RANGES)[]) {
+      if (Number.isFinite(saved[key])) {
+        const [min, max] = APPEARANCE_RANGES[key]
+        value[key] = Math.max(min, Math.min(max, saved[key]))
+      }
+    }
+    if (typeof saved.lightColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.lightColor)) value.lightColor = saved.lightColor
+  } catch { /* Malformed old settings retain safe defaults. */ }
+  return value
+}
+
+const CITY = `
+        <defs>
+          <linearGradient id="il-city-facade" x2="0" y2="1"><stop stop-color="#213440"/><stop offset="1" stop-color="#060d16"/></linearGradient>
+          <linearGradient id="il-city-haze" x2="0" y2="1"><stop stop-color="#060e1500"/><stop offset="1" stop-color="#080f17"/></linearGradient>
+          <pattern id="il-city-cyan" width="32" height="42" patternUnits="userSpaceOnUse"><rect x="4" y="5" width="7" height="5" fill="#80cbda" opacity=".65"/><rect x="20" y="5" width="7" height="5" fill="#f4c581" opacity=".5"/><rect x="4" y="26" width="7" height="5" fill="#5ca5c3" opacity=".38"/></pattern>
+          <pattern id="il-city-gold" width="40" height="48" patternUnits="userSpaceOnUse"><rect x="5" y="6" width="9" height="6" fill="#f0c17c" opacity=".7"/><rect x="25" y="30" width="9" height="6" fill="#e8b076" opacity=".5"/><rect x="5" y="30" width="9" height="6" fill="#a6b7cd" opacity=".3"/></pattern>
+        </defs>
+        <g fill="#142330" stroke="#314552" stroke-width="1">
+          <path d="M0 570H130V430H240V590H380V510H520V710H680V640H820V700H960V570H1080V660H1190V460H1310V520H1460V390H1600V1000H0Z"/>
+        </g>
+        <g fill="url(#il-city-facade)" stroke="#47606c" stroke-opacity=".6" stroke-width="2">
+          <path d="M35 1000V350H65V280H155V350H185V1000Z"/>
+          <path d="M235 1000V450H400V1000Z"/>
+          <path d="M445 1000V570H560V1000Z"/>
+          <path d="M620 1000V720H775V1000Z"/>
+          <path d="M840 1000V680H980V1000Z"/>
+          <path d="M1030 1000V490H1180V1000Z"/>
+          <path d="M1240 1000V290H1270V220H1370V290H1410V1000Z"/>
+          <path d="M1460 1000V430H1585V1000Z"/>
+        </g>
+        <g fill="url(#il-city-cyan)"><rect x="48" y="368" width="124" height="632"/><rect x="457" y="588" width="91" height="412"/><rect x="852" y="698" width="116" height="302"/><rect x="1254" y="312" width="142" height="688"/></g>
+        <g fill="url(#il-city-gold)"><rect x="248" y="470" width="139" height="530"/><rect x="632" y="738" width="131" height="262"/><rect x="1043" y="510" width="124" height="490"/><rect x="1472" y="448" width="101" height="552"/></g>
+        <g opacity=".8"><rect x="68" y="286" width="84" height="5" fill="#66cddd"/><rect x="244" y="484" width="9" height="125" fill="#eb69b6"/><rect x="1042" y="497" width="125" height="6" fill="#dfad65"/><rect x="1275" y="226" width="90" height="5" fill="#83b8ff"/><rect x="1391" y="332" width="7" height="145" fill="#699ee6"/></g>
+        <rect width="1600" height="1000" fill="url(#il-city-haze)" opacity=".35"/>
+      `
+
+export function sceneFor(p: Appearance): string {
+  const start = BASE_SCENE.indexOf('  <g opacity="0.5">')
+  const scanStart = BASE_SCENE.indexOf('  <g class="il-scanbar">')
+  const lattice = BASE_SCENE.slice(start, scanStart)
+  const scan = p.scan ? BASE_SCENE.slice(scanStart, BASE_SCENE.lastIndexOf('</svg>')) : ''
+  const rain = p.rain ? Array.from({ length: Math.round(p.rainAmount * .4) }, (_, i) =>
+    `<ellipse class="il-rain" cx="${((i * 37 + 11) % 100) * 16}" cy="-60" rx="${1.5 + i % 3}" ry="${7 + i % 5 * 3}" style="animation-duration:${(22 - p.rainSpeed * .16) * (.7 + i % 7 * .13)}s;animation-delay:-${i * 7 % 23}s"/>`).join('') : ''
+  return BASE_SCENE.slice(0, start) + `
+  <defs>
+    <filter id="il-distance"><feGaussianBlur stdDeviation="3.5"/></filter>
+    <filter id="il-glass"><feGaussianBlur stdDeviation="${p.glass ? p.glassStrength : 0}"/></filter>
+    <radialGradient id="il-light" cx="100%" cy="0%" r="95%"><stop stop-color="${p.lightColor}" stop-opacity=".75"/><stop offset=".4" stop-color="${p.lightColor}" stop-opacity=".3"/><stop offset="1" stop-color="${p.lightColor}" stop-opacity="0"/></radialGradient>
+    <linearGradient id="il-edge-light"><stop stop-color="#2fb4c9" stop-opacity="0"/><stop offset=".5" stop-color="#e8a33d"/><stop offset="1" stop-color="#2fb4c9" stop-opacity="0"/></linearGradient>
+    <style>
+      @keyframes il-rain-fall { from { transform:translateY(0) } to { transform:translateY(1160px) } }
+      @keyframes il-top-edge { from { transform:translateX(-500px) } to { transform:translateX(1600px) } }
+      .il-rain { fill:#b3dfed22;stroke:#b5dbe56b;stroke-width:.8;animation:il-rain-fall 16s linear infinite;animation-play-state:${p.motion ? 'running' : 'paused'} }
+      .il-top-edge { animation:il-top-edge 12s linear infinite;animation-play-state:${p.motion ? 'running' : 'paused'} }
+      .il-scanbar { animation-duration:${p.scanSpeed}s }
+      @media(prefers-reduced-motion:reduce) { .il-link,.il-node,.il-edge { animation:none!important } ${p.motion ? '' : '.il-scanbar { animation:none;display:none }'} }
+    </style>
+  </defs>
+  <g id="il-distant" filter="url(#il-glass)">
+    ${p.city ? `<g id="il-city" transform="translate(96 380) scale(.88 .62)" opacity=".62" filter="url(#il-distance)">${CITY}</g>` : ''}
+    <g id="il-lattice">${lattice}</g>
+  </g>
+  ${p.light ? `<rect id="il-light-plane" width="1600" height="1000" fill="url(#il-light)" opacity="${p.lightStrength / 100}"/>` : ''}
+  ${scan}
+  <g id="il-glass-rain">${rain}</g>
+  <rect class="il-top-edge" y="0" width="500" height="2" fill="url(#il-edge-light)"/>
+</svg>`
+}
+
+export function lookFor(p: Appearance): ThemeSetArgs {
+  return { ...BASE_LOOK, backdrop: { scene: 'interlinked', glass: p.glass ? { blur: p.glassStrength, tint: '#0a0e12', opacity: .18 } : false } }
+}
+export const SCENE = sceneFor(APPEARANCE_DEFAULTS)
+export const LOOK = lookFor(APPEARANCE_DEFAULTS)

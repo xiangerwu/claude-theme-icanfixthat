@@ -26,7 +26,8 @@ import {
 import type { Segment } from './format'
 import { careLine, placeholderSvg, portraitSvg } from './persona'
 import { barSvg, smallText, tapeSvg } from './svg'
-import { LOOK, SCENE, UNPAINTED } from './theme'
+import { APPEARANCE_DEFAULTS, APPEARANCE_RANGES, readAppearance, sceneFor, lookFor, UNPAINTED } from './theme'
+import type { Appearance } from './theme'
 import type { Run } from './svg'
 
 const EMPTY_STATS: Stats = {
@@ -498,7 +499,51 @@ function band(v: View, width: number, rows: number) {
   )
 }
 
+async function saveAppearance($: EngineInterface, state: { value: Appearance; status: string; saving: boolean }, candidate: Appearance) {
+    if (state.saving) return
+    state.saving = true
+    try {
+      const next = readAppearance(JSON.stringify(candidate))
+      const result = await $.config.set({ key: 'icanfixthat-hud.appearance', value: JSON.stringify(next) })
+      if ('deny' in result) { state.status = '未儲存：' + result.deny; return }
+      state.value = readAppearance(result.value)
+      const applied = await $.theme.set(lookFor(state.value))
+      state.status = applied.isDrawn ? '已儲存並套用。' : '已儲存；此介面未繪製背景：' + applied.reason
+    } catch (error) { state.status = '儲存失敗：' + String(error) }
+    finally { state.saving = false; $.ui.invalidate('ui.render') }
+  }
+
 export const register: Register = (on, options) => {
+  const appearanceState = { value: readAppearance(options['appearance']), status: '設定保存在本機；數值或色碼輸入後按 Enter。', saving: false }
+  on('config.set', { key: 'icanfixthat-hud.appearance' }, async ($, e, next) => {
+    const result = await next(e)
+    if (!('deny' in result)) {
+      appearanceState.value = readAppearance(result.value)
+      await $.theme.set(lookFor(appearanceState.value))
+      $.ui.invalidate('ui.render')
+    }
+    return result
+  })
+  on('ui.render', { component: 'Pane', requestId: 'interlinked-appearance' }, ($, e) => {
+    const { Box, Text, Button, Input, Select } = $.ui.resolve(e)
+    const toggles = [['city','顯示大樓'],['rain','玻璃雨滴'],['glass','背景／面板霧玻璃'],['light','右上光源'],['scan','掃描線'],['hud','顯示 HUD'],['motion','雨景／邊框動畫（含減少動畫例外）']] as const
+    const numbers = [['rainAmount','雨量 %'],['rainSpeed','雨速'],['glassStrength','霧化 px'],['lightStrength','亮度 %'],['scanSpeed','掃描週期 秒'],['hudWidth','HUD 寬度 %']] as const
+    return <Box flexDirection="column">
+      <Text color={C.amber}>夜城 · 外觀</Text>
+      {toggles.map(([key,label]) => <Select key={key} label={label} value={String(appearanceState.value[key])} options={[{value:'true',label:'開啟'},{value:'false',label:'關閉'}]} onSelect={value => { void saveAppearance($, appearanceState, { ...appearanceState.value, [key]: value === 'true' }) }} />)}
+      {numbers.map(([key,label]) => <Input key={key} label={`${label}（${APPEARANCE_RANGES[key].join('–')}）`} value={String(appearanceState.value[key])} submitLabel="套用" onSubmit={value => {
+        if (!value.trim() || !Number.isFinite(Number(value))) { appearanceState.status='請輸入有效數值。'; $.ui.invalidate('ui.render'); return }
+        void saveAppearance($, appearanceState, { ...appearanceState.value, [key]: Number(value) })
+      }} />)}
+      <Input key="lightColor" label="光源色碼 #RRGGBB" value={appearanceState.value.lightColor} submitLabel="套用" onSubmit={value => {
+        if (!/^#[0-9a-f]{6}$/i.test(value)) { appearanceState.status='色碼格式為 #RRGGBB。'; $.ui.invalidate('ui.render'); return }
+        void saveAppearance($, appearanceState, { ...appearanceState.value, lightColor:value })
+      }} />
+      <Text dimColor>{appearanceState.saving ? '儲存中…' : appearanceState.status}</Text>
+      <Button key="appearance-reset" label="恢復預設" onPress={() => { void saveAppearance($, appearanceState, { ...APPEARANCE_DEFAULTS }) }} />
+      <Button key="appearance-close" label="關閉" onPress={() => { void $.ui.close({id:'interlinked-appearance'}) }} />
+    </Box>
+  })
   const personaName = typeof options['persona_name'] === 'string' ? options['persona_name'].trim().toUpperCase() : ''
 
   // What the band draws. The counters change synchronously, so parallel tool
@@ -521,7 +566,7 @@ export const register: Register = (on, options) => {
       $.ui.toast(UNPAINTED)
     }
     try {
-      const set = await $.theme.set(LOOK)
+      const set = await $.theme.set(lookFor(appearanceState.value))
       if (!set.isDrawn) {
         $.ui.status(set.reason)
       }
@@ -599,7 +644,7 @@ export const register: Register = (on, options) => {
     }
     const { Svg } = $.ui.resolve(e)
 
-    return <Svg source={SCENE} alt="A slow lattice of interlinked cells under a cold scan" isInteractive />
+    return <Svg source={sceneFor(appearanceState.value)} alt="遠方大樓、格線與霧玻璃雨景" isInteractive />
   })
 
   on('ui.render', { component: 'AbovePrompt' }, ($, e, next) => {
@@ -618,6 +663,10 @@ export const register: Register = (on, options) => {
       portrait,
     }
 
-    return band(v, e.props.bodyColumns, e.props.maxRows)
+    const { Box, Button } = v.T
+    return <Box flexDirection="column">
+      <Box justifyContent="flex-end"><Button key="appearance-open" label="◈ 外觀" onPress={() => { void $.ui.open({id:'interlinked-appearance',title:'夜城外觀',focus:true,closeOnEscape:true,rows:24,columns:52}) }} /></Box>
+      {appearanceState.value.hud ? band(v, Math.floor(e.props.bodyColumns * appearanceState.value.hudWidth / 100), Math.max(1, e.props.maxRows - 1)) : null}
+    </Box>
   })
 }

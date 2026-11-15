@@ -96,3 +96,13 @@ The code is under the [MIT License](../LICENSE).
 ## Credits
 
 Portrait art in the example screenshot: **@kuzuko0503**. The artwork belongs to the artist and is not covered by this repository's MIT License. It is shown here with credit only. The portrait files themselves (`assets/portrait.*`) are not part of the repository.
+
+## Night-city controls (0.3.0)
+
+Use **◈ 外觀** above the HUD to open the native Claude pane. It remains available with the HUD hidden; Escape or Close dismisses it. Settings persist through the plugin's `appearance` configuration field.
+
+The distant city/windows sit behind the lattice, then frosted glass/rain. Controls cover buildings, rain amount/speed, glass strength, upper-right light brightness/hex color, scan period, HUD visibility/width (80–100%), animation and reset. Claude uses native Select/Input controls rather than HTML sliders/color pickers; submit numeric and `#RRGGBB` fields with Enter. Claude's own telemetry remains the HUD data source.
+
+Rain and the animation override default off. Reduced motion pauses rain, the border and the scan until the theme-only override is enabled. Backdrops render on desktop/mobile, not in the terminal. Mobile lacks the host panel backdrop blur; the scene's SVG blur still applies.
+
+Validated with 14 real hook/component-tree tests on Claude Code 2.1.325. Live Claude desktop appearance is not yet verified. Source backup: local ignored `backup-0.2.0-appearance/`.
