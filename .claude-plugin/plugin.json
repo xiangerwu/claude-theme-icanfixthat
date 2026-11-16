@@ -1,6 +1,6 @@
 {
   "name": "icanfixthat-hud",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Interlinked: a night-city theme (dark palette, animated lattice backdrop) with a HUD above the prompt: context, plan limits, tool calls and a persona strip.",
   "license": "MIT",
   "keywords": [
@@ -17,7 +17,7 @@
       "type": "string",
       "title": "Persona name",
       "description": "Name shown on the HUD's status line. Leave empty for none.",
-      "default": "lapwing"
+      "default": "Claude 娘"
     },
     "appearance": {
       "type": "string",

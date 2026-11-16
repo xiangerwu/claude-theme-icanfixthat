@@ -13,3 +13,7 @@ Thumbs.db
 /backup-*/
 /appearance-preview*.svg
 /appearance-preview*.png
+
+# Approved generated avatar; original portrait backups stay local.
+!/assets/portrait.jpg
+!/assets/portrait.png

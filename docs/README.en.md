@@ -13,7 +13,7 @@ A night-city HUD for Claude Code, drawn in the band above the prompt.
   │      │ ████████░░░░░░░░       ██████████████░█     ▁▁▅█▁
   │      │ ■訊息 5% ■系統工具 2%  每週 38% 剩3天5時 · 節奏正常    近 10 回合
   └──────┘ ▁▂▂▃ 近 4 回合          ██████░░░░░░░░░░
-  ◆ LAPWING ▸ 5小時額度已用 96%,將於 00:30 重置。
+  ◆ Claude 娘 ▸ 5小時額度已用 96%,將於 00:30 重置。
   工具呼叫 0  回合 10  上回合 3秒  失敗 0  運行 00:14     22:23 11月13日 週五 ○ 待命
 └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
 ```
@@ -49,10 +49,10 @@ Answer `y` to add the marketplace, then pick a scope.
 
 ## Make it yours
 
-The persona ships as **LAPWING** with an empty portrait frame.
+The persona ships as **Claude 娘** with a generated night-city avatar.
 
 - **Name**: set `persona_name` in the plugin's options (the config menu, or `settings.json` → `pluginConfigs["icanfixthat-hud"].options.persona_name`). Empty shows no name.
-- **Portrait**: put your picture at `assets/portrait.jpg` (about 256×320, used by the desktop, VS Code and mobile apps, under a pink scanline veil) and `assets/portrait.png` (about 128×160, used by terminals that draw images). They are read when a session starts and are git-ignored, so art you may use yourself is never redistributed with the repository. Without them the HUD draws a "NO SIGNAL" frame.
+- **Portrait**: put your picture at `assets/portrait.jpg` (about 256×320, used by the desktop, VS Code and mobile apps, under a pink scanline veil) and `assets/portrait.png` (about 128×160, used by terminals that draw images). They are read when a session starts and the bundled generated images are tracked. Do not commit private replacements. Without them the HUD draws a "NO SIGNAL" frame.
 - **Colors**: the palette is the `C` object at the top of [`hooks/register.tsx`](../hooks/register.tsx).
 
 ## Develop
@@ -78,7 +78,7 @@ Layout:
 hooks/register.tsx               the hooks and the band
 hooks/format.ts                  pure formatting helpers (bars, pace, clock)
 hooks/persona.ts                 portrait frame and placeholder
-assets/                          your portrait.jpg / portrait.png (git-ignored)
+assets/                          bundled Claude avatar: portrait.jpg / portrait.png
 types/index.d.ts                 shared types
 tests/hud.test.tsx               helper and render tests
 ```
@@ -106,3 +106,5 @@ The distant city/windows sit behind the lattice, then frosted glass/rain. Contro
 Far to near: city, lattice, glass. Raindrops hit the glass and slide down; the glass can switch to frosted, which blurs both the city and the lattice. Rain defaults off. The lattice breathing and the scan keep their 0.2.0 behavior (scan period defaults to 11 s). The top-edge animation defaults off. Backdrops render on desktop/mobile, not in the terminal. Mobile lacks the host panel backdrop blur; the scene's SVG blur still applies.
 
 Validated with 14 real hook/component-tree tests on Claude Code 2.1.325. Live Claude desktop appearance is not yet verified. Source backup: local ignored `backup-0.2.0-appearance/`.
+
+目前隨附 / Included avatar: **Claude 娘**. [頭像來源與非商用說明 / Avatar credits](AVATAR-CREDITS.md).

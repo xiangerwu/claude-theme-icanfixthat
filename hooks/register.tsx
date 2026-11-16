@@ -555,7 +555,7 @@ export const register: Register = (on, options) => {
       <Button key="appearance-close" label="關閉" onPress={() => { void $.ui.close({id:'interlinked-appearance'}) }} />
     </Box>
   })
-  const personaName = typeof options['persona_name'] === 'string' ? options['persona_name'].trim().toUpperCase() : ''
+  const personaName = typeof options['persona_name'] === 'string' ? options['persona_name'].trim() : ''
 
   // What the band draws. The counters change synchronously, so parallel tool
   // calls never lose an increment, and each change asks for a redraw.

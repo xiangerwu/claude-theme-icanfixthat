@@ -13,7 +13,7 @@
   │      │ ████████░░░░░░░░       ██████████████░█     ▁▁▅█▁
   │      │ ■訊息 5% ■系統工具 2%  每週 38% 剩3天5時 · 節奏正常    近 10 回合
   └──────┘ ▁▂▂▃ 近 4 回合          ██████░░░░░░░░░░
-  ◆ LAPWING ▸ 5小時額度已用 96%,將於 00:30 重置。
+  ◆ Claude 娘 ▸ 5小時額度已用 96%,將於 00:30 重置。
   工具呼叫 0  回合 10  上回合 3秒  失敗 0  運行 00:14     22:23 11月13日 週五 ○ 待命
 └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
 ```
@@ -62,10 +62,10 @@ HUD 上方的「◈ 外觀」開啟 Claude 原生面板；關閉 HUD 後入口�
 
 ## 自訂外觀
 
-預設角色名稱為 **LAPWING**，頭像框為空。
+預設角色名稱為 **Claude 娘**，隨附同角色的夜城風格生成頭像。
 
 - **名稱**：在外掛設定選單，或 `settings.json` → `pluginConfigs["icanfixthat-hud"].options.persona_name` 設定 `persona_name`。留空便不顯示名稱。
-- **頭像**：將圖片放在 `assets/portrait.jpg`（建議約 256×320，供桌面版、VS Code 與行動版使用，會覆蓋粉色掃描線）及 `assets/portrait.png`（建議約 128×160，供支援圖片的終端機使用）。圖片會在工作階段開始時讀取，且已由 Git 忽略，不會隨 repo 散布你的個人使用圖片。未提供圖片時，HUD 會顯示「NO SIGNAL」外框。
+- **頭像**：將圖片放在 `assets/portrait.jpg`（建議約 256×320，供桌面版、VS Code 與行動版使用，會覆蓋粉色掃描線）及 `assets/portrait.png`（建議約 128×160，供支援圖片的終端機使用）。圖片會在工作階段開始時讀取，隨附生成圖已納入版本控管；換成私人圖片後請勿提交。未提供圖片時，HUD 會顯示「NO SIGNAL」外框。
 - **配色**：修改 [`hooks/register.tsx`](hooks/register.tsx) 頂部的 `C` 物件。
 
 ## 開發
@@ -93,7 +93,7 @@ claude plugin test .
 hooks/register.tsx              hooks 與 HUD 資訊區
 hooks/format.ts                 格式化工具（進度條、用量節奏、時鐘）
 hooks/persona.ts                頭像框與預設占位畫面
-assets/                         個人 portrait.jpg / portrait.png（Git 忽略）
+assets/                         Claude 娘 portrait.jpg / portrait.png
 types/index.d.ts                共用型別
 tests/hud.test.tsx              工具函式與畫面渲染測試
 ```
@@ -110,4 +110,6 @@ tests/hud.test.tsx              工具函式與畫面渲染測試
 
 ## 圖片來源
 
-範例截圖中的頭像繪師：**@kuzuko0503**。圖片版權屬於原作者，不適用於本 repo 的 MIT 授權，此處僅標示來源。頭像檔案本身（`assets/portrait.*`）未包含在 repo 中。
+範例截圖中的頭像繪師：**@kuzuko0503**。圖片版權屬於原作者，不適用於本 repo 的 MIT 授權，此處僅標示來源。該舊頭像不再隨附；目前 `assets/portrait.*` 是新生成的 Claude 娘，來源見下方。
+
+目前隨附 / Included avatar: **Claude 娘**. [頭像來源與非商用說明 / Avatar credits](docs/AVATAR-CREDITS.md).

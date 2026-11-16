@@ -5,8 +5,8 @@
 //   settings.json → pluginConfigs["icanfixthat-hud"].options). Empty = no name.
 // - Portrait: put your own picture at assets/portrait.jpg (desktop, VS Code,
 //   mobile; about 256×320) and assets/portrait.png (terminal; about 128×160).
-//   Both are read when the session starts and are git-ignored, so art you
-//   may use yourself is not redistributed with the repository. Missing, the
+//   Both are read when the session starts. Bundled generated art is tracked;
+//   do not commit private replacements. See docs/AVATAR-CREDITS.md. Missing, the
 //   HUD draws an empty 「無訊號」 frame.
 //
 // The frame may be taller or narrower than the picture: the picture fills it,

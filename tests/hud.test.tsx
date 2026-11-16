@@ -153,7 +153,7 @@ test('the band counts a turn and its tool call, on every surface', async ($, on)
     expect(await text(/^每週 /)).toBe('每週 38%')
     expect(await text(/^峰值 /)).toBe('峰值 1')
     expect(await text(/^5小時額度/)).toMatch(/^5小時額度已用 96%,將於 \d\d:\d\d 重置。$/)
-    expect(await text(/^◆ LAPWING ▸$/)).toBe('◆ LAPWING ▸')
+    expect(await text(/^◆ Claude 娘 ▸$/)).toBe('◆ Claude 娘 ▸')
     expect(await text(/^今天也辛苦了|^寫了好久|^別擔心|^卡住的話|^別忘了吃飯|^眼睛累了|^你今天的努力|^慢慢來|^做完這段|^夜深了|^外面在下雨|^不管結果/)).toBe(careLine(NOW))
     if (surface === 'terminal') {
       expect(await text(/^上回合 $/)).toBe('上回合 ')
@@ -183,12 +183,12 @@ test('working: the status line and light change', async ($, on) => {
 
 // The kit in Claude Code 2.1.325 ignores `test(name, { options }, body)` (the
 // manifest default still arrives), so only the default name is tested here.
-test('the persona name defaults to LAPWING', async ($, on) => {
+test('the persona name defaults to Claude 娘', async ($, on) => {
   boot(on)
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
 
   const ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
-  expect((await ui.find({ type: 'Text', text: /^◆/ }))?.text).toBe('◆ LAPWING ▸')
+  expect((await ui.find({ type: 'Text', text: /^◆/ }))?.text).toBe('◆ Claude 娘 ▸')
   await ui.unmount()
 })
 
@@ -209,7 +209,7 @@ test('the band keeps one row: narrow drops columns, short keeps the strip', asyn
   const short = await $.ui.mount({ ...BAND, surface: 'terminal', props: { ...BAND.props, maxRows: 6 } })
   expect(await short.find({ type: 'Text', text: /^上下文$/ })).toBe(undefined)
   expect(await short.find({ type: 'Text', text: /^○ 待命$/ })).not.toBe(undefined)
-  expect(await short.find({ type: 'Text', text: /^◆ LAPWING ▸$/ })).not.toBe(undefined)
+  expect(await short.find({ type: 'Text', text: /^◆ Claude 娘 ▸$/ })).not.toBe(undefined)
   await short.unmount()
 })
 
