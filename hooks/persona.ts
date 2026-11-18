@@ -4,7 +4,7 @@
 // - Name: `persona_name` in the plugin's options (config menu, or
 //   settings.json → pluginConfigs["icanfixthat-hud"].options). Empty = no name.
 // - Portrait: put your own picture at assets/portrait.jpg (desktop, VS Code,
-//   mobile; about 256×320) and assets/portrait.png (terminal; about 128×160).
+//   mobile; at most 256×256 (the Svg source caps at 131072 chars)) and assets/portrait.png (terminal; about 128×160).
 //   Both are read when the session starts. Bundled generated art is tracked;
 //   do not commit private replacements. See docs/AVATAR-CREDITS.md. Missing, the
 //   HUD draws an empty 「無訊號」 frame.

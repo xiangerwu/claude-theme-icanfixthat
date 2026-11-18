@@ -123,6 +123,10 @@ async function loadPortrait($: EngineInterface) {
   try {
     const jpeg = (await $.fs.read(`${$.plugin.root}/assets/portrait.jpg`, { as: 'bytes' })).base64
     svg = portraitSvg(jpeg, PORTRAIT_W, PORTRAIT_H)
+    // An Svg source over 131072 characters is refused, and with it the whole band.
+    if (svg.length > 131_072) {
+      svg = null
+    }
   } catch {
     svg = null
   }
